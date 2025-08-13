@@ -154,6 +154,11 @@ export default {
                 });
             }
             this.loading.isActive = false;
+            // ✅ Log the delivery info directly from Vuex
+            // console.log("Shipping Address in PaymentComponent:", this.getShippingAddress);
+            // console.log("Delivery Date:", this.getShippingAddress.delivery_date);
+            // console.log("Delivery Time:", this.getShippingAddress.delivery_time);
+            // console.log("Order Note:", this.getShippingAddress.order_note);
         }).catch((err) => {
             this.loading.isActive = false;
         });
@@ -164,6 +169,8 @@ export default {
         },
         confirmOrder: function (e) {
             e.target.disabled = true;
+                // console.log('Shipping Address Data:', this.getShippingAddress);
+
             this.form = {
                 subtotal: this.subtotal,
                 discount: this.discount,
@@ -177,7 +184,11 @@ export default {
                 coupon_id: Object.keys(this.cartCoupon).length > 0 ? this.cartCoupon.id : 0,
                 source: sourceEnum.WEB,
                 payment_method: Object.keys(this.paymentMethod).length > 0 ? this.paymentMethod.id : 0,
-                products: JSON.stringify(this.products)
+                products: JSON.stringify(this.products),
+
+                delivery_date: this.getShippingAddress.delivery_date || '',
+                delivery_time: this.getShippingAddress.delivery_time || '',
+                order_note: this.getShippingAddress.order_note || ''
             }
 
             this.$store.dispatch('frontendOrder/save', this.form).then(orderResponse => {

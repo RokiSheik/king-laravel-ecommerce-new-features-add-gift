@@ -63,21 +63,21 @@
                         <li class="flex flex-wrap sm:flex-nowrap gap-2">
                             <span class="text-sm font-semibold capitalize w-28 flex-shrink-0">{{
                                 $t('label.order_id')
-                            }}:</span>
+                                }}:</span>
                             <span class="text-sm font-semibold capitalize">#{{ order.order_serial_no }}</span>
                         </li>
                         <li class="flex flex-wrap sm:flex-nowrap gap-2">
                             <span class="text-sm font-semibold capitalize w-28 flex-shrink-0">{{
                                 $t('label.order_date')
-                            }}:</span>
+                                }}:</span>
                             <span class="text-sm font-normal capitalize">{{ order.order_date }} {{
                                 order.order_time
-                            }}</span>
+                                }}</span>
                         </li>
                         <li class="flex flex-wrap sm:flex-nowrap gap-2">
                             <span class="text-sm font-semibold capitalize w-28 flex-shrink-0">{{
                                 $t('label.order_type')
-                            }}:</span>
+                                }}:</span>
                             <span>
                                 {{ enums.orderTypeEnumArray[order.order_type] }}
                             </span>
@@ -85,7 +85,7 @@
                         <li class="flex flex-wrap sm:flex-nowrap gap-2">
                             <span class="text-sm font-semibold capitalize w-28 flex-shrink-0">{{
                                 $t('label.order_status')
-                            }}:</span>
+                                }}:</span>
                             <span class="font-sm capitalize px-2 rounded-3xl" :class="orderStatusClass(order.status)">
                                 {{ enums.orderStatusEnumArray[order.status] }}
                             </span>
@@ -93,7 +93,7 @@
                         <li class="flex flex-wrap sm:flex-nowrap gap-2">
                             <span class="text-sm font-semibold capitalize w-28 flex-shrink-0">{{
                                 $t('label.payment_status')
-                            }}:</span>
+                                }}:</span>
                             <span class="font-sm capitalize px-2 rounded-3xl"
                                 :class="enums.paymentStatusEnum.PAID === order.payment_status ? 'text-[#2AC769] bg-[#E2FFEE]' : 'text-[#FB4E4E] bg-[#FFE8E8]'">
                                 {{ enums.paymentStatusEnumArray[order.payment_status] }}
@@ -102,7 +102,7 @@
                         <li class="flex flex-wrap sm:flex-nowrap gap-2">
                             <span class="text-sm font-semibold capitalize w-28 flex-shrink-0">{{
                                 $t('label.payment_method')
-                            }}:</span>
+                                }}:</span>
                             <span class="text-sm font-normal capitalize">
                                 {{ order.payment_method_name }}
                             </span>
@@ -131,7 +131,7 @@
                                 }}:</span>
                             <span class="text-sm font-normal capitalize" dir="ltr">{{ address.country_code }} {{
                                 address.phone
-                            }}</span>
+                                }}</span>
                         </li>
                         <li class="flex flex-wrap sm:flex-nowrap gap-2" v-if="address.email">
                             <span class="text-sm font-semibold capitalize w-20 flex-shrink-0">{{ $t('label.email')
@@ -151,6 +151,25 @@
                                 </span>
                             </span>
                         </li>
+
+                        <li v-if="address.address_type === enums.addressTypeEnum.SHIPPING" class="flex flex-col gap-1">
+                            <h3 class="text-sm font-semibold capitalize text-center">
+                                Delivery Details
+                            </h3>
+                            <span class="text-sm font-normal capitalize">
+                                <span class="font-bold">DATE: </span>
+                                <span v-if="address.delivery_date">{{ address.delivery_date }}</span>
+                            </span>
+                            <span class="text-sm font-normal capitalize">
+                                <span class="font-bold">TIME: </span>
+                                <span v-if="address.delivery_time">{{ address.delivery_time }}</span>
+                            </span>
+                            <span class="text-sm font-normal capitalize">
+                                <span class="font-bold">NOTE: </span>
+                                <span v-if="address.order_note">{{ address.order_note }}</span>
+                            </span>
+                        </li>
+
                     </ul>
                 </div>
 

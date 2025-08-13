@@ -154,6 +154,12 @@
                                         <span v-if="address.state">{{ address.state }},</span>
                                         <span v-if="address.country">{{ address.country }},</span>
                                         <span v-if="address.zip_code">{{ address.zip_code }}</span>
+                                        <span v-if="address.zip_code">{{ address.zip_code }}</span>
+                                        <span v-if="address.zip_code">{{ address.zip_code }}</span>
+                                        <span v-if="address.zip_code">{{ address.zip_code }}</span>
+                                        <span v-if="address.delivery_date">{{ address.delivery_date }}</span>
+                                        <span v-if="address.delivery_time">{{ address.delivery_time }}</span>
+                                        <span v-if="address.order_note">{{ address.order_note }}</span>
                                     </td>
                                 </tr>
                             </tbody>

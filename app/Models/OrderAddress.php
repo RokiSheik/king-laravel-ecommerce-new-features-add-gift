@@ -47,5 +47,8 @@ class OrderAddress extends Model
         'zip_code'     => 'string',
         'latitude'     => 'string',
         'longitude'    => 'string',
+            'delivery_date' => 'date',      // ✅ cast properly
+    'delivery_time' => 'string',    // ✅ or 'time' if you prefer
+    'order_note'    => 'string'     // ✅ cast properly
     ];
 }

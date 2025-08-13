@@ -186,6 +186,9 @@ class FrontendOrderService
                             'zip_code'     => $shippingAddress->zip_code,
                             'latitude'     => $shippingAddress->latitude,
                             'longitude'    => $shippingAddress->longitude,
+                            'delivery_date' => $request->delivery_date,
+                            'delivery_time' => $request->delivery_time,
+                            'order_note' => $request->order_note,
                         ]);
                     }
                     if ($billingAddress) {

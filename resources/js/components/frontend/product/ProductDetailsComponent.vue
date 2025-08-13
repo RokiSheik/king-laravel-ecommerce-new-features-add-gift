@@ -105,7 +105,11 @@
                         </dd>
                     </dl>
 
-                    <OrderNoteComponent />
+                    <OrderNoteComponent 
+                     v-model:deliveryDate="deliveryDate"
+  v-model:deliveryTime="deliveryTime"
+  v-model:note="orderNote"
+                    />
                     <div class="flex flex-wrap items-center gap-4 mb-10">
 
                         
@@ -347,6 +351,9 @@ export default {
                 totalPrice: 0,
                 maximum_purchase_quantity: 0
             },
+            deliveryDate: '',
+    deliveryTime: '',
+    orderNote: ''
         }
     },
     computed: {
@@ -393,49 +400,69 @@ export default {
         },
         // Added by Roki For order Button
         orderNow: function () {
-    this.enableAddToCardButton = true;
+  this.enableAddToCardButton = true;
 
-    this.productArray = {
-        name: this.temp.name,
-        product_id: this.temp.productId,
-        image: this.temp.image,
-        variation_names: '',
-        variation_id: this.temp.variationId,
-        sku: this.temp.sku,
-        stock: this.temp.stock,
-        taxes: this.temp.taxes,
-        shipping: this.temp.shipping,
-        quantity: this.temp.quantity,
-        discount: this.temp.discount,
-        price: this.temp.price,
-        old_price: this.temp.oldPrice,
-        total_price: this.temp.totalPrice,
-        maximum_purchase_quantity: this.temp.maximum_purchase_quantity
-    };
+  this.productArray = {
+    name: this.temp.name,
+    product_id: this.temp.productId,
+    image: this.temp.image,
+    variation_names: '',
+    variation_id: this.temp.variationId,
+    sku: this.temp.sku,
+    stock: this.temp.stock,
+    taxes: this.temp.taxes,
+    shipping: this.temp.shipping,
+    quantity: this.temp.quantity,
+    discount: this.temp.discount,
+    price: this.temp.price,
+    old_price: this.temp.oldPrice,
+    total_price: this.temp.totalPrice,
+    maximum_purchase_quantity: this.temp.maximum_purchase_quantity
+  };
 
-    if (this.selectedVariation) {
-        this.$store.dispatch("frontendProductVariation/ancestorsToString", this.selectedVariation.id).then((res) => {
-            this.productArray.variation_names = res.data.data;
-            this.variationComponent = false;
+  // ✅ Add delivery info into query
+  const query = {
+    delivery_date: this.deliveryDate || '',
+    delivery_time: this.deliveryTime || '',
+    order_note: this.orderNote || ''
+  };
 
-            this.$store.dispatch("frontendCart/lists", this.productArray).then(() => {
-                this.resetTempData();
-                this.$router.push({ name: "frontend.checkout" }); // ✅ Redirect to checkout
-            }).catch(() => {
-                // Ignore validation error, still redirect
-                this.$router.push({ name: "frontend.checkout" });
-            });
-        });
-    } else {
-        this.$store.dispatch("frontendCart/lists", this.productArray).then(() => {
+  if (this.selectedVariation) {
+    this.$store
+      .dispatch(
+        "frontendProductVariation/ancestorsToString",
+        this.selectedVariation.id
+      )
+      .then((res) => {
+        this.productArray.variation_names = res.data.data;
+        this.variationComponent = false;
+
+        this.$store
+          .dispatch("frontendCart/lists", this.productArray)
+          .then(() => {
             this.resetTempData();
-            this.$router.push({ name: "frontend.checkout" }); // ✅ Redirect to checkout
-        }).catch(() => {
-            // Ignore validation error, still redirect
-            this.$router.push({ name: "frontend.checkout" });
-        });
-    }
-        },
+            this.$router.push({ name: "frontend.checkout", query });
+          })
+          .catch(() => {
+            this.$router.push({ name: "frontend.checkout", query });
+          });
+      });
+  } else {
+    this.$store
+      .dispatch("frontendCart/lists", this.productArray)
+      .then(() => {
+        this.resetTempData();
+        this.$router.push({ name: "frontend.checkout", query });
+      })
+      .catch(() => {
+        this.$router.push({ name: "frontend.checkout", query });
+      });
+  }
+}
+
+,
+
+
 
 
         currencyFormat: function (amount, decimal, currency, position) {
@@ -707,7 +734,17 @@ export default {
         $route() {
             this.show();
             this.showRelatedProduct();
-        }
+        },
+        deliveryDate(newVal) {
+    this.$emit('update:deliveryDate', newVal);
+  },
+  deliveryTime(newVal) {
+    this.$emit('update:deliveryTime', newVal);
+  },
+  note(newVal) {
+    this.$emit('update:note', newVal);
+  }
+        
     }
 }
 </script>

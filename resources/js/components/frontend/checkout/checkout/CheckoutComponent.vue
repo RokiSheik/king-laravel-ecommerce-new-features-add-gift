@@ -111,7 +111,11 @@ export default {
             orderTypeEnum: orderTypeEnum,
             shippingAndBillingCheck: true,
             billingStatus: false,
-            modelOutlet: 0
+            modelOutlet: 0,
+            // ✅ new reactive fields
+        deliveryDate: '',
+        deliveryTime: '',
+        orderNote: ''
         }
     },
     computed: {
@@ -131,23 +135,48 @@ export default {
             return this.$store.getters['frontendOutlet/lists'];
         }
     },
-    mounted() {
-        this.loading.isActive = true;
-        this.$store.dispatch('frontendOrderArea/lists').then(res => {
-            this.loading.isActive = false;
-        }).catch((err) => {
-            this.loading.isActive = false;
-        });
+mounted() {
+    this.loading.isActive = true;
 
-        this.loading.isActive = true;
-        this.$store.dispatch('frontendOutlet/lists', {
-            status : this.enums.statusEnum.ACTIVE
-        }).then(res => {
-            this.loading.isActive = false;
-        }).catch((err) => {
-            this.loading.isActive = false;
-        });
-    },
+    // Load order areas
+    this.$store.dispatch('frontendOrderArea/lists')
+        .finally(() => { this.loading.isActive = false; });
+
+    this.loading.isActive = true;
+
+    // Load outlets
+    this.$store.dispatch('frontendOutlet/lists', {
+        status: this.enums.statusEnum.ACTIVE
+    }).finally(() => { this.loading.isActive = false; });
+
+    // ✅ Grab delivery info from URL query parameters
+    const { delivery_date, delivery_time, order_note } = this.$route.query;
+
+    if (delivery_date || delivery_time || order_note) {
+        // Update local reactive fields
+        this.deliveryDate = delivery_date || '';
+        this.deliveryTime = delivery_time || '';
+        this.orderNote = order_note || '';
+
+        // Save to Vuex
+        const shipping = {
+            ...this.getShippingAddress,
+            delivery_date: this.deliveryDate,
+            delivery_time: this.deliveryTime,
+            order_note: this.orderNote
+        };
+
+        // Dispatch Vuex action to store shipping info
+        this.$store.dispatch('frontendCart/shippingAddress', shipping)
+            .then(() => {
+                if (this.shippingAndBillingCheck) {
+                    this.$store.dispatch('frontendCart/billingAddress', shipping);
+                }
+            });
+    }
+},
+
+
     methods: {
         changeOrderType: function (e) {
             this.$store.dispatch('frontendCart/updateOrderType', e)
@@ -158,6 +187,23 @@ export default {
                 this.$store.dispatch('frontendCart/billingAddress', e).then().catch();
             }
         },
+         updateDeliveryInfo() {
+        const shipping = {
+            ...this.getShippingAddress,
+            delivery_date: this.deliveryDate,
+            delivery_time: this.deliveryTime,
+            order_note: this.orderNote
+        };
+
+        // Save to Vuex
+        this.$store.dispatch('frontendCart/shippingAddress', shipping);
+        // console.log(shipping);
+
+        // Update billing if checkbox is checked
+        // if (this.shippingAndBillingCheck) {
+        //     this.$store.dispatch('frontendCart/billingAddress', shipping);
+        // }
+    },
         billingAddress: function (e) {
             this.$store.dispatch('frontendCart/billingAddress', e).then().catch();
         },

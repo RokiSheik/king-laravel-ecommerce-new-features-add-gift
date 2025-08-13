@@ -211,6 +211,23 @@
                                     <span v-if="address.zip_code">{{ address.zip_code }}</span>
                                 </span>
                             </li>
+                                                    <li v-if="address.address_type === enums.addressTypeEnum.SHIPPING" class="flex flex-col gap-1">
+                            <h3 class="text-sm font-semibold capitalize text-center">
+                                Delivery Details
+                            </h3>
+                            <span class="text-sm font-normal capitalize">
+                                <span class="font-bold">DATE: </span>
+                                <span v-if="address.delivery_date">{{ address.delivery_date }}</span>
+                            </span>
+                            <span class="text-sm font-normal capitalize">
+                                <span class="font-bold">TIME: </span>
+                                <span v-if="address.delivery_time">{{ address.delivery_time }}</span>
+                            </span>
+                            <span class="text-sm font-normal capitalize">
+                                <span class="font-bold">NOTE: </span>
+                                <span v-if="address.order_note">{{ address.order_note }}</span>
+                            </span>
+                        </li>
                         </ul>
                     </div>
                 </div>

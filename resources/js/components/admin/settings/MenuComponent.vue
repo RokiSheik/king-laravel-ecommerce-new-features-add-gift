@@ -121,6 +121,10 @@
                 <i class="lab-line-license-code text-sm"></i>
                 {{ $t("menu.license") }}
             </router-link>
+            <router-link :to="{ name: 'admin.settings.home' }" class="db-tab-btn">
+                <i class="lab lab-line-theme text-sm"></i>
+                Home
+            </router-link>
         </nav>
     </div>
 </template>

@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\StateController;
 use App\Http\Controllers\Admin\StockController;
 use App\Http\Controllers\Admin\ThemeController;
+use App\Http\Controllers\Admin\HomePageController;
 use App\Http\Controllers\Auth\SignupController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DamageController;
@@ -200,6 +201,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum'])->group(func
         Route::prefix('site')->name('site.')->group(function () {
             Route::get('/', [SiteController::class, 'index']);
             Route::match(['put', 'patch'], '/', [SiteController::class, 'update']);
+        });
+
+        Route::prefix('homepage')->name('home.')->group(function () {
+            Route::get('/', [HomePageController::class, 'index']);
+            Route::post('/', [HomePageController::class, 'update']);
         });
 
         Route::prefix('theme')->name('theme.')->group(function () {

@@ -1,3 +1,4 @@
+
 const SettingsComponent = () =>  import("../../components/admin/settings/SettingsComponent");
 const CompanyComponent = () =>  import("../../components/admin/settings/Company/CompanyComponent");
 const SiteComponent = () =>  import("../../components/admin/settings/Site/SiteComponent");
@@ -60,6 +61,7 @@ const StateListComponent = () =>  import("../../components/admin/settings/states
 const CityComponent = () =>  import("../../components/admin/settings/cities/CityComponent");
 const CityListComponent = () =>  import("../../components/admin/settings/cities/CityListComponent");
 const LocationSetupComponent = () =>  import("../../components/admin/settings/LocationSetup/LocationSetupComponent");
+const HomeComponent = () => import("../../components/admin/settings/Home/HomeComponent");
 
 export default [
     {
@@ -714,6 +716,17 @@ export default [
                     auth: true,
                     permissionUrl: "settings",
                     breadcrumb: "license",
+                }
+            },
+             {
+                path: "home",
+                component: HomeComponent,
+                name: "admin.settings.home",
+                meta: {
+                    isFrontend: false,
+                    auth: true,
+                    permissionUrl: "settings",
+                    breadcrumb: "home",
                 }
             },
             {

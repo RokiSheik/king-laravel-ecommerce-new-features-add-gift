@@ -97,6 +97,17 @@ export default {
                 this.$router.push({ name: 'frontend.home' });
             }
         })
+
+        // Store delivery info in Vuex from route query
+        if (this.$route.query.delivery_date) {
+            this.$store.commit('frontendCart/setDeliveryDate', this.$route.query.delivery_date);
+        }
+        if (this.$route.query.delivery_time) {
+            this.$store.commit('frontendCart/setDeliveryTime', this.$route.query.delivery_time);
+        }
+        if (this.$route.query.order_note) {
+            this.$store.commit('frontendCart/setOrderNote', this.$route.query.order_note);
+        }
     },
     methods: {
         goBack: function () {

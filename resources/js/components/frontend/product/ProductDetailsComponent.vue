@@ -135,7 +135,24 @@
                             <span class="relative z-10">BUY NOW | {{ total_price }}</span>
                         </button>
 
+
                     </div>
+                                            <!-- Popup -->
+<ProductPopupComponent
+  :visible="showProductPopup"
+  :basePrice="productArray.price"
+  :shippingPrice="productArray.shipping"
+  :addons="addonsList"
+  :categories="categoriesList"
+  :baseUrl="setting.site_url"
+  :baseProductId="productArray.product_id"
+  @close="showProductPopup = false"
+  @continue="handlePopupContinue"
+/>
+
+
+
+
 
                 </div>
             </div>
@@ -271,7 +288,7 @@ import { FreeMode, Navigation, Thumbs } from 'swiper/modules';
 import LoadingComponent from "../components/LoadingComponent";
 import starRating from "vue-star-rating";
 import targetService from "../../../services/targetService";
-import router from "../../../router";
+import router from '../../../router';
 import CategoryBreadcrumbComponent from "../components/CategoryBreadcrumbComponent";
 import ProductListComponent from "../components/ProductListComponent";
 import VariationComponent from "../components/VariationComponent";
@@ -282,6 +299,8 @@ import 'vue-inner-image-zoom/lib/vue-inner-image-zoom.css';
 
 import InnerImageZoom from 'vue-inner-image-zoom';
 import OrderNoteComponent from "./OrderNoteComponent.vue";
+import ProductPopupComponent from "./ProductPopupComponent.vue";
+import { product } from "../../../store/modules/product";
 
 export default {
     name: "ProductDetailsComponent",
@@ -294,6 +313,7 @@ export default {
         SwiperSlide,
         LoadingComponent,
         OrderNoteComponent,
+        ProductPopupComponent,
         'inner-image-zoom': InnerImageZoom
     },
     setup() {
@@ -353,10 +373,19 @@ export default {
             },
             deliveryDate: '',
     deliveryTime: '',
-    orderNote: ''
+    orderNote: '',
+    showProductPopup: false,
+    checkoutQuery: {},
+    addonsList: [],       // will store add-on products
+    categoriesList: [],
+    products: [] 
+
         }
     },
     computed: {
+        allProducts() {
+        return this.$store.getters["frontendProduct/allProducts"];
+    },
         setting: function () {
             return this.$store.getters['frontendSetting/lists'];
         },
@@ -399,9 +428,10 @@ export default {
             return appService.onlyNumber(e);
         },
         // Added by Roki For order Button
-        orderNow: function () {
-  this.enableAddToCardButton = true;
+        async orderNow() {
+  if (+this.temp.quantity < 1) return;
 
+  // Set main product
   this.productArray = {
     name: this.temp.name,
     product_id: this.temp.productId,
@@ -420,47 +450,106 @@ export default {
     maximum_purchase_quantity: this.temp.maximum_purchase_quantity
   };
 
-  // ✅ Add delivery info into query
-  const query = {
+  // Prepare checkout query
+  this.checkoutQuery = {
     delivery_date: this.deliveryDate || '',
     delivery_time: this.deliveryTime || '',
     order_note: this.orderNote || ''
   };
 
-  if (this.selectedVariation) {
-    this.$store
-      .dispatch(
-        "frontendProductVariation/ancestorsToString",
-        this.selectedVariation.id
-      )
-      .then((res) => {
-        this.productArray.variation_names = res.data.data;
-        this.variationComponent = false;
+  // Ensure products are loaded
+  await this.$store.dispatch("frontendProduct/categoryWiseProducts");
+  this.products = this.$store.getters["frontendProduct/categoryWiseProducts"];
+    // Use Vuex getter for all categories
+    await this.$store.dispatch("frontendProductCategory/lists");
+const cats = this.$store.getters["frontendProductCategory/lists"];
+this.categoriesList = Array.isArray(cats) ? cats.map(cat => ({ id: cat.id, name: cat.name })) : [];
 
-        this.$store
-          .dispatch("frontendCart/lists", this.productArray)
-          .then(() => {
-            this.resetTempData();
-            this.$router.push({ name: "frontend.checkout", query });
-          })
-          .catch(() => {
-            this.$router.push({ name: "frontend.checkout", query });
-          });
-      });
-  } else {
-    this.$store
-      .dispatch("frontendCart/lists", this.productArray)
-      .then(() => {
-        this.resetTempData();
-        this.$router.push({ name: "frontend.checkout", query });
-      })
-      .catch(() => {
-        this.$router.push({ name: "frontend.checkout", query });
-      });
-  }
+    // Set add-ons (exclude main product) and ensure category_id and id exist for reliable selection
+    // Always pass a new array reference for addonsList
+    const freshAddons = this.products
+        .filter(p => p.product_id !== this.productArray.product_id)
+        .map(p => ({
+            ...p,
+            id: p.id ?? p.product_id ?? p.id,
+            product_id: p.product_id ?? p.id,
+            price: p.price ?? p.discounted_price ?? p.old_price ?? 0,
+            discounted_price: (typeof p.discounted_price === 'number' || (typeof p.discounted_price === 'string' && p.discounted_price.trim() !== '')) ? p.discounted_price : undefined,
+            old_price: (typeof p.old_price === 'number' || (typeof p.old_price === 'string' && p.old_price.trim() !== '')) ? p.old_price : undefined,
+            category_id: p.category_id || (p.category && p.category.id)
+        }));
+    this.addonsList = [...freshAddons];
+
+  // Show popup
+  this.showProductPopup = true;
 }
-
 ,
+
+handlePopupContinue({ selectedAddons, total }) {
+  console.log('Parent: handlePopupContinue called', selectedAddons, total);
+
+    // Add main product first
+    this.$store.dispatch("frontendCart/lists", this.productArray)
+        .then(() => {
+            // Add selected add-ons using the same logic as main product
+            function parsePrice(val) {
+                if (typeof val === 'string') {
+                    val = val.replace(/[^\d.\-]/g, '');
+                }
+                return Number(val) || 0;
+            }
+            return Promise.all(selectedAddons.map(addon => {
+                let price = 0;
+                if (addon.currency_price !== undefined && addon.currency_price !== null && addon.currency_price !== '') {
+                    price = parsePrice(addon.currency_price);
+                } else if (addon.price !== undefined && addon.price !== null && addon.price !== '') {
+                    price = parsePrice(addon.price);
+                } else if (addon.discounted_price !== undefined && addon.discounted_price !== null && addon.discounted_price !== '') {
+                    price = parsePrice(addon.discounted_price);
+                } else if (addon.old_price !== undefined && addon.old_price !== null && addon.old_price !== '') {
+                    price = parsePrice(addon.old_price);
+                }
+                // Ensure all required fields are present for add-on
+                return this.$store.dispatch("frontendCart/lists", {
+                    name: addon.name,
+                    product_id: addon.id ?? addon.product_id,
+                    image: addon.cover ?? addon.image,
+                    variation_names: addon.variation_names ?? '',
+                    variation_id: addon.variation_id ?? null,
+                    sku: addon.sku ?? '',
+                    stock: addon.stock ?? 1000,
+                    taxes: addon.taxes ?? [],
+                    shipping: addon.shipping ?? { shipping_type: 5, shipping_cost: '0.000000', is_product_quantity_multiply: 10 },
+                    quantity: 1,
+                    discount: addon.discount ?? 0,
+                    price,
+                    old_price: addon.old_price ?? price,
+                    total_tax: 0,
+                    subtotal: price,
+                    total: price,
+                    total_price: price,
+                    maximum_purchase_quantity: addon.maximum_purchase_quantity ?? 1000
+                });
+            }));
+        })
+        .then(() => {
+            // Match reference logic — clean state before redirect
+            this.resetTempData();
+
+            console.log('Parent: navigating to checkout');
+            this.$router.push({ name: "frontend.checkout", query: this.checkoutQuery });
+        })
+        .catch(err => {
+            console.error('Error adding to cart:', err);
+            // Still redirect if error like in reference
+            this.$router.push({ name: "frontend.checkout", query: this.checkoutQuery });
+        })
+        .finally(() => {
+            this.showProductPopup = false;
+        });
+}
+,
+
 
 
 

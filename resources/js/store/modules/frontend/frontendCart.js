@@ -21,6 +21,9 @@ export const frontendCart = {
         totalTax: 0,
         shippingCharge: 0,
         isList: false,
+        delivery_date: '',
+        delivery_time: '',
+        order_note: '',
     },
     getters: {
         lists: function (state) {
@@ -215,6 +218,15 @@ export const frontendCart = {
         },
     },
     mutations: {
+        setDeliveryDate: function (state, payload) {
+            state.delivery_date = payload;
+        },
+        setDeliveryTime: function (state, payload) {
+            state.delivery_time = payload;
+        },
+        setOrderNote: function (state, payload) {
+            state.order_note = payload;
+        },
         subtotal: function (state) {
             state.total = 0;
             if (state.lists.length > 0) {

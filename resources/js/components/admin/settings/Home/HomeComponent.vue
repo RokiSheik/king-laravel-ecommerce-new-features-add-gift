@@ -24,18 +24,14 @@
             <small class="db-field-alert" v-if="errors.title">{{ errors.title[0] }}</small>
           </div>
 
-          <!-- Description -->
+          <!-- Description (Rich Text) -->
           <div class="form-col-12">
             <label for="description" class="db-field-title required">
               {{ $t("label.description") }}
             </label>
-            <textarea
-              v-model="form.description"
-              :class="errors.description ? 'invalid' : ''"
-              id="description"
-              class="db-field-control"
-              rows="6"
-            ></textarea>
+            <div :class="errors.description ? 'invalid textarea-error-box-style' : ''">
+              <quill-editor id="description" v-model:value="form.description" class="!h-40 textarea-border-radius" />
+            </div>
             <small class="db-field-alert" v-if="errors.description">{{ errors.description[0] }}</small>
           </div>
 
@@ -56,10 +52,11 @@
 import axios from "axios";
 import LoadingComponent from "../../components/LoadingComponent";
 import alertService from "../../../../services/alertService";
+import { quillEditor } from 'vue3-quill';
 
 export default {
   name: "HomeComponent",
-  components: { LoadingComponent },
+  components: { LoadingComponent, quillEditor },
   data() {
     return {
       loading: false,

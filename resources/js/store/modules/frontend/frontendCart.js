@@ -220,12 +220,24 @@ export const frontendCart = {
     mutations: {
         setDeliveryDate: function (state, payload) {
             state.delivery_date = payload;
+            state.shippingAddress = {
+                ...state.shippingAddress,
+                delivery_date: payload
+            };
         },
         setDeliveryTime: function (state, payload) {
             state.delivery_time = payload;
+            state.shippingAddress = {
+                ...state.shippingAddress,
+                delivery_time: payload
+            };
         },
         setOrderNote: function (state, payload) {
             state.order_note = payload;
+            state.shippingAddress = {
+                ...state.shippingAddress,
+                order_note: payload
+            };
         },
         subtotal: function (state) {
             state.total = 0;

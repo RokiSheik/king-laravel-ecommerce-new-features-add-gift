@@ -15,7 +15,7 @@ class HomepageRequest extends FormRequest
 {
     return [
         'title' => 'required|string|max:255',
-        'description' => 'required|string|max:5000',
+        'description' => 'required|string|max:500000',
     ];
 }
 

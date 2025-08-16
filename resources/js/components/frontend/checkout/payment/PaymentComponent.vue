@@ -137,6 +137,24 @@ export default {
     },
     mounted() {
         this.loading.isActive = true;
+        // Store delivery info in Vuex from route query if present
+        console.log('PaymentComponent mounted');
+        console.log('Route query delivery_date:', this.$route.query.delivery_date);
+        console.log('Route query delivery_time:', this.$route.query.delivery_time);
+        console.log('Route query order_note:', this.$route.query.order_note);
+        if (this.$route.query.delivery_date) {
+            this.$store.commit('frontendCart/setDeliveryDate', this.$route.query.delivery_date);
+        }
+        if (this.$route.query.delivery_time) {
+            this.$store.commit('frontendCart/setDeliveryTime', this.$route.query.delivery_time);
+        }
+        if (this.$route.query.order_note) {
+            this.$store.commit('frontendCart/setOrderNote', this.$route.query.order_note);
+        }
+        // Log Vuex shippingAddress after committing
+        setTimeout(() => {
+            console.log('Vuex shippingAddress after commit:', this.getShippingAddress);
+        }, 500);
         this.$store.dispatch('frontendPaymentGateway/lists', { status: this.statusEnum.ACTIVE }).then(res => {
             if (res.data.data.length > 0) {
                 _.forEach(res.data.data, (gateway) => {

@@ -744,6 +744,11 @@ Route::prefix('frontend')->name('frontend.')->middleware(['installed', 'apiKey',
         Route::get('/', [FrontendSettingController::class, 'index']);
     });
 
+    Route::prefix('homepage')->name('home.')->group(function () {
+            Route::get('/', [HomePageController::class, 'index']);
+            Route::post('/', [HomePageController::class, 'update']);
+        });
+
     Route::prefix('country-code')->name('country-code.')->group(function () {
         Route::get('/', [FrontendCountryCodeController::class, 'index']);
         Route::get('/show/{country}', [FrontendCountryCodeController::class, 'show']);
